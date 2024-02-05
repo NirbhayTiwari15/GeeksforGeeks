@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="pooling.css">
+    <link rel="shortcut icon" href="image.png" type="image/x-icon">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""/>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""></script>
+
+    <title>Cab Pooling</title>
+</head>
+<body>
+    <header>
+        <h1>Cab Pooling</h1>
+    </header>
+    <div id="map"></div>
+    
+    <main>
+        <div id="Pooling-form">
+            
+            <form id="cabPoolingForm">
+                <h2>Pool a Cab</h2>
+                
+                <label for="pickupLocation">Pickup Location:</label>
+                <input type="text" id="pickupLocation" name="pickupLocation" required>
+
+                <label for="dropLocation">Drop Location:</label>
+                <input type="text" id="dropLocation" name="dropLocation" required>
+
+                <label for="cabType">Select Car Type:</label>
+                <select id="cabType" name="cabType">
+                    <option value="sedan">Sedan</option>
+                    <option value="suv">SUV</option>
+                    <option value="hatchback">Hatchback</option>
+                </select>
+
+                <button type="button" id="bookNowBtn">Book Now</button>
+            </form>
+            
+            
+        </div>
+        
+
+    </main>
+    
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let map;
+            let polyline;
+    
+            navigator.geolocation.getCurrentPosition((position) => {
+                let { latitude, longitude } = position.coords;
+                map = L.map('map').setView([latitude, longitude], 15);
+                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    minZoom: 1,
+                }).addTo(map);
+                L.marker([latitude, longitude]).addTo(map);
+            });
+    
+            document.getElementById('bookNowBtn').addEventListener('click', function () {
+          
+                let pickupLocation = document.getElementById('pickupLocation').value;
+                let dropLocation = document.getElementById('dropLocation').value;
+    
+               
+                let pickupCoordinates = [map.getCenter().lat + 0.01, map.getCenter().lng + 0.01];
+                let dropCoordinates = [map.getCenter().lat - 0.01, map.getCenter().lng - 0.01];
+    
+                
+                map.eachLayer(function (layer) {
+                    if (layer instanceof L.Marker || layer instanceof L.Polyline) {
+                        layer.remove();
+                    }
+                });
+    
+                L.marker(pickupCoordinates).addTo(map).bindPopup('Pickup Location: ' + pickupLocation).openPopup();
+                L.marker(dropCoordinates).addTo(map).bindPopup('Drop Location: ' + dropLocation).openPopup();
+    
+                
+                polyline = L.polyline([pickupCoordinates, dropCoordinates], { color: 'blue' }).addTo(map);
+                map.fitBounds([pickupCoordinates, dropCoordinates]);
+            });
+        });
+    </script>
+    
+    
+    
+</body>
+</html>
